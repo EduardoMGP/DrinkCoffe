@@ -1,0 +1,12 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine on
+    # Bloco pra forcar o redirect pra https quando o dominio nao for localhost
+    RewriteCond %{HTTP_HOST} !^localhost$
+    RewriteCond %{HTTPS} !=on
+    RewriteRule ^/?(.*) https://%{SERVER_NAME}/$1 [R=302,L]
+
+    RewriteCond %{REQUEST_FILENAME} !-f
+
+    SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
+    RewriteRule ^ index.php [L]
+</IfModule>
