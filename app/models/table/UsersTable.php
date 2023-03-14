@@ -13,6 +13,9 @@ class UsersTable extends Table
 
     use EncryptTrait;
 
+    /**
+     * @return int
+     */
     public static function count()
     {
         $sql = "SELECT COUNT(*) FROM users";
@@ -101,10 +104,10 @@ class UsersTable extends Table
      */
     public static function update(User $user)
     {
-        $sql = "UPDATE users SET drink = :drink, email = :email, password = :password, name = :name WHERE id = :id";
+        $sql = "UPDATE users SET drink = (select coalesce(sum(drink), 0) from users_drink where user_id = :user_id), email = :email, password = :password, name = :name WHERE id = :id";
         $stmt = DB::pdo()->prepare($sql);
         $stmt->bindValue(":id", $user->id());
-        $stmt->bindValue(":drink", $user->drink());
+        $stmt->bindValue(":user_id", $user->id());
         $stmt->bindValue(":email", $user->email());
         $stmt->bindValue(":password", $user->password());
         $stmt->bindValue(":name", $user->name());
@@ -112,6 +115,11 @@ class UsersTable extends Table
         return $user;
     }
 
+    /**
+     * @param string $email
+     * @param string $password
+     * @return User|null
+     */
     public static function getByCredentials(string $email, string $password)
     {
         $user = self::getByEmail($email);

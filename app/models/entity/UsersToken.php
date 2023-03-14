@@ -2,8 +2,6 @@
 
 namespace App\Models\Entity;
 
-use App\Models\EncryptTrait;
-
 class UsersToken extends Entity
 {
 

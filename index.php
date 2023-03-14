@@ -33,8 +33,8 @@ if (isset($route->route)) {
         return;
     } catch (Exception $e) {
         echo $e->getMessage();
-        header("HTTP/1.0 404 Not Found");
+        (new \Mosyle\Response('Not Found', 'Route not found', 404))->send();
     }
 } else {
-    header("HTTP/1.0 404 Not Found");
+    (new \Mosyle\Response('Not Found', 'Route not found', 404))->send();
 }

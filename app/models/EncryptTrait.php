@@ -5,11 +5,19 @@ namespace App\Models;
 trait EncryptTrait
 {
 
+    /**
+     * @return string
+     */
     private static function salt()
     {
         return uniqid();
     }
 
+    /**
+     * @param $password
+     * @param null $salt
+     * @return string|void
+     */
     public static function hash($password, $salt = null)
     {
         if ($password != null) {
@@ -20,6 +28,11 @@ trait EncryptTrait
         }
     }
 
+    /**
+     * @param $password
+     * @param $hash
+     * @return bool
+     */
     public static function verify($password, $hash)
     {
         $salt = substr(strrev($hash), 40, strlen($hash));

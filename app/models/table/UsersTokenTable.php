@@ -4,6 +4,7 @@ namespace App\Models\Table;
 
 use App\Models\EncryptTrait;
 use App\Models\Entity\UsersToken;
+use Exception;
 use Mosyle\DB;
 
 class UsersTokenTable extends Table
@@ -11,6 +12,11 @@ class UsersTokenTable extends Table
 
     use EncryptTrait;
 
+    /**
+     * @param string $token
+     * @return UsersToken
+     * @throws Exception
+     */
     public static function validateToken($token)
     {
         $sql = "SELECT * FROM users_token right join users on users.id = users_token.user_id WHERE token = :token AND expired_at > NOW() AND ip = :ip";
@@ -22,8 +28,15 @@ class UsersTokenTable extends Table
         return UsersToken::toObject($user_token);
     }
 
+    /**
+     * @param int $user_id
+     * @return string
+     * @throws Exception
+     */
     public static function generateToken(int $user_id)
     {
+        self::deleteAllTokens($user_id);
+
         $token = openssl_random_pseudo_bytes(132);
         $accessToken = base64_encode($token);
 
@@ -38,6 +51,10 @@ class UsersTokenTable extends Table
         return $accessToken;
     }
 
+    /**
+     * @param $token
+     * @throws Exception
+     */
     public static function deleteToken($token)
     {
         $sql = "DELETE FROM users_token WHERE token = :token";
@@ -46,6 +63,10 @@ class UsersTokenTable extends Table
         $stmt->execute();
     }
 
+    /**
+     * @param $user_id
+     * @throws Exception
+     */
     public static function deleteAllTokens($user_id)
     {
         $sql = "DELETE FROM users_token WHERE user_id = :user_id";
@@ -54,6 +75,9 @@ class UsersTokenTable extends Table
         $stmt->execute();
     }
 
+    /**
+     * @throws Exception
+     */
     public static function deleteAllExpiredToken()
     {
         $sql = "DELETE FROM users_token WHERE expired_at < NOW()";

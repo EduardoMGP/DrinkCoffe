@@ -22,7 +22,7 @@ create table if not exists users_token
     expired_at timestamp    not null,
     created_at timestamp    not null default current_timestamp,
     updated_at timestamp    not null default current_timestamp on update current_timestamp,
-    foreign key (user_id) references users (id)
+    foreign key (user_id) references users (id) on delete cascade
 
 );
 
@@ -33,6 +33,6 @@ create table if not exists users_drink
     drink      int       not null,
     created_at timestamp not null default current_timestamp,
     updated_at timestamp not null default current_timestamp on update current_timestamp,
-    foreign key (user_id) references users (id)
+    foreign key (user_id) references users (id) on delete cascade
 
 );

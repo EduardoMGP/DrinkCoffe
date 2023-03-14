@@ -40,22 +40,22 @@ class Routers
 
     public static function getRoute($uri, $method)
     {
-
         foreach (self::$routes as $route) {
             if ($route->uri() == $uri && $route->method() == $method) {
                 return (object)[
-                    'route' => $route,
+                    'route'  => $route,
                     'params' => []
                 ];
-            } else {
-                $regex = '#{([a-zA-Z]|[0-9])+\}#';
-                $regex = '#^' . preg_replace($regex, '([a-zA-Z]+|[0-9]+)', $route->uri()) . '$#';
-                if (preg_match_all($regex, $uri, $matches, PREG_SET_ORDER) && $route->method() == $method) {
-                    return (object)[
-                        'route' => $route,
-                        'params' => array_slice($matches[0], 1)
-                    ];
-                }
+            }
+        }
+        foreach (self::$routes as $route) {
+            $regex = '#{([a-zA-Z]|[0-9])+\}#';
+            $regex = '#^' . preg_replace($regex, '([a-zA-Z]+|[0-9]+)', $route->uri()) . '$#';
+            if (preg_match_all($regex, $uri, $matches, PREG_SET_ORDER) && $route->method() == $method) {
+                return (object)[
+                    'route'  => $route,
+                    'params' => array_slice($matches[0], 1)
+                ];
             }
         }
 

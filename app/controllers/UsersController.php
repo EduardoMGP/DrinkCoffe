@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\Entity\User;
+use App\Models\Table\UsersDrinksTable;
 use App\Models\Table\UsersTable;
 use App\Models\Table\UsersTokenTable;
 use DrinksValidator;
@@ -76,7 +77,7 @@ class UsersController extends ApiController
     public function delete($id)
     {
         if (($user_token = $this->isLogged()) != false) {
-            if ($user_token->user()->role() == 'admin') {
+            if ($user_token->user()->role() == 'admin' || $user_token->user()->id() == $id) {
                 if (UsersTable::get($id)) {
                     try {
                         UsersTable::delete($id);
@@ -156,6 +157,46 @@ class UsersController extends ApiController
 
     }
 
+    public function drinkPerDay($id)
+    {
+        if (($user_token = $this->isLogged()) != false) {
+            if ($user_token->user()->id() == $id || $user_token->user()->role() == 'admin') {
+                $drinks = UsersDrinksTable::drinkPerDay($id);
+                return new Response('User drink per day found', 'user_drink_per_day_found', 200, $drinks);
+            }
+        }
+        return new Response('Unauthorized', 'unauthorized', 401);
+    }
+
+    public function rankingDrinksInDate()
+    {
+        if (!isset($_GET['date']) || empty($_GET['date']) ||
+            !preg_match('/^\d{2}\/\d{2}\/\d{4}$/', $_GET['date'])
+        ) {
+            return new Response('Invalid date', 'invalid_date', 422);
+        }
+
+        if (($user_token = $this->isLogged()) != false) {
+            $ranking = UsersDrinksTable::getRankingDrinkersInDate($_GET['date'] ?? date('Y-m-d'));
+            return new Response('Ranking found', 'ranking_found', 200, $ranking);
+
+        }
+        return new Response('Unauthorized', 'unauthorized', 401);
+    }
+
+    public function rankingDrinks($period)
+    {
+        if (is_numeric($period)) {
+            if (($user_token = $this->isLogged()) != false) {
+                $ranking = UsersDrinksTable::getRankingDrinkersInPeriod($period);
+                return new Response('Ranking found', 'ranking_found', 200, $ranking);
+            }
+            return new Response('Unauthorized', 'unauthorized', 401);
+        }
+
+        return new Response('Invalid period', 'invalid_period', 422);
+    }
+
     public function drink($id)
     {
         if (($user_token = $this->isLogged()) != false) {
@@ -164,9 +205,8 @@ class UsersController extends ApiController
                 if ($user) {
                     $validator = $this->validate($_POST, DrinksValidator::class);
                     if ($validator === true) {
-                        $user->setDrink($user->drink() + intval($_POST['drink'] ?? 1));
                         try {
-                            UsersTable::update($user);
+                            UsersDrinksTable::drink($user, intval($_POST['drink'] ?? 1));
                             return new Response('User drink updated successfully', 'user_drink_updated', 200, $user->toArray());
                         } catch (\Exception $e) {
                             return new Response('Internal server error', 'internal_server_error', 500);
