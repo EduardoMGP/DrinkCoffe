@@ -36,3 +36,5 @@ create table if not exists users_drink
     foreign key (user_id) references users (id) on delete cascade
 
 );
+
+insert into users (name, email, password) values ('admin', 'admin@admin.com', '$2y$10');

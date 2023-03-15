@@ -78,7 +78,8 @@ class UsersDrinksTable extends Table
         $sql = "SELECT users.*, SUM(users_drink.drink) as total, DATE_FORMAT(users_drink.created_at, '%d/%m/%Y') as date FROM users_drink 
                 RIGHT JOIN users ON users.id = users_drink.user_id
                 WHERE user_id = :user_id
-                GROUP BY DATE_FORMAT(users_drink.created_at, '%d/%m/%Y')";
+                GROUP BY DATE_FORMAT(users_drink.created_at, '%d/%m/%Y')
+                ORDER BY DATE_FORMAT(users_drink.created_at, '%d/%m/%Y') DESC";
         $stmt = DB::pdo()->prepare($sql);
         $stmt->bindValue(":user_id", $user_id);
         $stmt->execute();

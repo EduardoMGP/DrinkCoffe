@@ -110,4 +110,10 @@ class User extends Entity
         return $this->role;
     }
 
+    public function setRole(mixed $role)
+    {
+        $this->role = $role;
+        return $this;
+    }
+
 }

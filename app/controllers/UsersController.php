@@ -140,6 +140,14 @@ class UsersController extends ApiController
                                 $user->setPassword($_PUT['password']);
                             }
 
+                            if (isset($_PUT['role']) && !empty($_PUT['role'])) {
+                                if ($user_token->user()->role() == 'admin') {
+                                    $user->setRole($_PUT['role'] == 'admin' ? 'admin' : 'user');
+                                } else {
+                                    return new Response('Unauthorized', 'unauthorized', 401);
+                                }
+                            }
+
                             UsersTable::update($user);
                             return new Response('User updated successfully', 'user_updated', 200, $user->toArray());
                         } catch (\Exception $e) {
@@ -149,6 +157,8 @@ class UsersController extends ApiController
                     }
                     return new Response('Failed to update user', 'field_validation_error', 422, $validate);
                 }
+
+                return new Response('User not found', 'user_not_found', 404);
             }
 
         }
@@ -157,6 +167,10 @@ class UsersController extends ApiController
 
     }
 
+    /**
+     * @param $id
+     * @return Response
+     */
     public function drinkPerDay($id)
     {
         if (($user_token = $this->isLogged()) != false) {
@@ -168,6 +182,9 @@ class UsersController extends ApiController
         return new Response('Unauthorized', 'unauthorized', 401);
     }
 
+    /**
+     * @return Response
+     */
     public function rankingDrinksInDate()
     {
         if (!isset($_GET['date']) || empty($_GET['date']) ||
@@ -184,19 +201,27 @@ class UsersController extends ApiController
         return new Response('Unauthorized', 'unauthorized', 401);
     }
 
+    /**
+     * @param $period
+     * @return Response
+     */
     public function rankingDrinks($period)
     {
-        if (is_numeric($period)) {
-            if (($user_token = $this->isLogged()) != false) {
+        if (($user_token = $this->isLogged()) != false) {
+            if (is_numeric($period)) {
                 $ranking = UsersDrinksTable::getRankingDrinkersInPeriod($period);
                 return new Response('Ranking found', 'ranking_found', 200, $ranking);
             }
-            return new Response('Unauthorized', 'unauthorized', 401);
+            return new Response('Invalid period', 'invalid_period', 422);
         }
 
-        return new Response('Invalid period', 'invalid_period', 422);
+        return new Response('Unauthorized', 'unauthorized', 401);
     }
 
+    /**
+     * @param $id
+     * @return Response
+     */
     public function drink($id)
     {
         if (($user_token = $this->isLogged()) != false) {

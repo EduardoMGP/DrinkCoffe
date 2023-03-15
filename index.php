@@ -32,8 +32,7 @@ if (isset($route->route)) {
         }
         return;
     } catch (Exception $e) {
-        echo $e->getMessage();
-        (new \Mosyle\Response('Not Found', 'Route not found', 404))->send();
+        (new \Mosyle\Response('Internal server error', 'internal_server_error', 500))->send();
     }
 } else {
     (new \Mosyle\Response('Not Found', 'Route not found', 404))->send();

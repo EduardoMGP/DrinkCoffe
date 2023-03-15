@@ -75,13 +75,27 @@ class UsersTable extends Table
     public static function create(User $user)
     {
         $hash = self::hash($user->password());
-        $sql = "INSERT INTO users (name, email, password) VALUES (:name, :email, :password)";
+        $sql = "INSERT INTO users (name, email, password, role) VALUES (:name, :email, :password, :role)";
         $stmt = DB::pdo()->prepare($sql);
         $stmt->bindValue(":name", $user->name());
         $stmt->bindValue(":email", $user->email());
         $stmt->bindValue(":password", $hash);
+        $stmt->bindValue(":role", $user->role() ?? 'user');
         $stmt->execute();
         return $user->setId(DB::pdo()->lastInsertId());
+    }
+
+    public static function createNotExists(array $array)
+    {
+        $user = self::getByEmail($array['email']);
+        if (!$user) {
+            $user = new User();
+            $user->setName($array['name']);
+            $user->setEmail($array['email']);
+            $user->setPassword($array['password']);
+            $user->setRole($array['role']);
+            self::create($user);
+        }
     }
 
     /**
@@ -104,13 +118,14 @@ class UsersTable extends Table
      */
     public static function update(User $user)
     {
-        $sql = "UPDATE users SET drink = (select coalesce(sum(drink), 0) from users_drink where user_id = :user_id), email = :email, password = :password, name = :name WHERE id = :id";
+        $sql = "UPDATE users SET role = :role, drink = (select coalesce(sum(drink), 0) from users_drink where user_id = :user_id), email = :email, password = :password, name = :name WHERE id = :id";
         $stmt = DB::pdo()->prepare($sql);
         $stmt->bindValue(":id", $user->id());
         $stmt->bindValue(":user_id", $user->id());
         $stmt->bindValue(":email", $user->email());
         $stmt->bindValue(":password", $user->password());
         $stmt->bindValue(":name", $user->name());
+        $stmt->bindValue(":role", $user->role() ?? 'user');
         $stmt->execute();
         return $user;
     }
